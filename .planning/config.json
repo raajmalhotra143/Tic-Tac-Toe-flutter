@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "mode": "guided",
+    "commit_frequency": "phase",
+    "automation_level": "medium"
+  },
+  "project": {
+    "name": "Neon Tic-Tac-Toe",
+    "tier": "professional",
+    "stack": ["flutter", "supabase", "riverpod"]
+  }
+}
