@@ -1,10 +1,11 @@
 # Roadmap: Neon Tic-Tac-Toe (Pro)
 
 ## Phase 1: Foundation & Infrastructure
-- [ ] Initialize Supabase project and database schema.
-- [ ] Set up Riverpod for state management.
-- [ ] Implement local database (SQLite/Hive) for progression tracking.
-- [ ] Scaffold project structure following `lib/features/`.
+**Goal:** Establish technical foundation with Supabase, Isar, and Riverpod.
+**Plans:** 3 plans
+- [ ] 01-01-PLAN.md — Core Scaffolding & Dependencies
+- [ ] 01-02-PLAN.md — Persistence & Local Infrastructure
+- [ ] 01-03-PLAN.md — Remote Infrastructure & Auth
 
 ## Phase 2: Offline Core & AI
 - [ ] Implement core Tic-Tac-Toe logic engine.
