@@ -31,6 +31,9 @@ dependencies:
   confetti: any
   animated_text_kit: any
   flutter_animate: ^4.5.2
+  firebase_core: ^4.8.0
+  firebase_auth: ^6.5.0
+  google_sign_in: ^7.2.0
 
 dev_dependencies:
   flutter_test:

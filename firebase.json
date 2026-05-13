@@ -7,7 +7,11 @@
   },
   "auth": {
     "providers": {
-      "emailPassword": true
+      "emailPassword": true,
+      "googleSignIn": {
+        "supportEmail": "raaj16272@gmail.com",
+        "oAuthBrandDisplayName": "Neon TicTacToe"
+      }
     }
   }
 }

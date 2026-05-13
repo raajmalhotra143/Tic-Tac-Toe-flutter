@@ -1,10 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/neon_theme.dart';
+import '../services/auth_service.dart';
 
-class AuthScreen extends StatelessWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
+
+  @override
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+  bool _isLogin = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleAuth() async {
+    setState(() => _isLoading = true);
+    final authService = ref.read(authServiceProvider);
+    
+    final result = _isLogin 
+      ? await authService.signInWithEmail(_emailController.text, _passwordController.text)
+      : await authService.registerWithEmail(_emailController.text, _passwordController.text);
+
+    setState(() => _isLoading = false);
+
+    if (result != null) {
+      if (mounted) context.go('/modes');
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isLogin ? 'Login Failed' : 'Registration Failed'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isLoading = true);
+    final result = await ref.read(authServiceProvider).signInWithGoogle();
+    setState(() => _isLoading = false);
+
+    if (result != null) {
+      if (mounted) context.go('/modes');
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google Sign-In Failed'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +96,11 @@ class AuthScreen extends StatelessWidget {
                         icon: Icons.arrow_back,
                         onTap: () => context.pop(),
                       ).animate().fadeIn().slideX(),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'SYSTEM ACCESS',
+                          _isLogin ? 'SYSTEM ACCESS' : 'NEW REGISTRATION',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),
                         ),
                       ).animate().fadeIn().scale(),
                       const SizedBox(width: 48),
@@ -61,9 +123,9 @@ class AuthScreen extends StatelessWidget {
                           
                           const SizedBox(height: 16),
                           
-                          const Text(
-                            'AUTHENTICATION REQUIRED',
-                            style: TextStyle(
+                          Text(
+                            _isLogin ? 'AUTHENTICATION REQUIRED' : 'CREATE GRID IDENTITY',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -89,6 +151,7 @@ class AuthScreen extends StatelessWidget {
                             child: Column(
                               children: [
                                 TextField(
+                                  controller: _emailController,
                                   style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
                                     labelText: 'ACCESS ID (EMAIL)',
@@ -102,6 +165,7 @@ class AuthScreen extends StatelessWidget {
                                 const SizedBox(height: 24),
                                 
                                 TextField(
+                                  controller: _passwordController,
                                   obscureText: true,
                                   style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
@@ -115,43 +179,95 @@ class AuthScreen extends StatelessWidget {
                                 
                                 const SizedBox(height: 48),
                                 
-                                _AnimatedButton(
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Authentication bypassed in Offline Mode.'),
-                                        backgroundColor: NeonColors.primary,
+                                if (_isLoading)
+                                  const CircularProgressIndicator(color: NeonColors.primary)
+                                else ...[
+                                  _AnimatedButton(
+                                    onTap: _handleAuth,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        color: NeonColors.primary,
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: NeonColors.primary.withValues(alpha: 0.4),
+                                            blurRadius: 15,
+                                            offset: const Offset(0, 5),
+                                          )
+                                        ],
                                       ),
-                                    );
-                                    context.pop();
-                                  },
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      color: NeonColors.primary,
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: NeonColors.primary.withValues(alpha: 0.4),
-                                          blurRadius: 15,
-                                          offset: const Offset(0, 5),
-                                        )
-                                      ],
-                                    ),
-                                    child: const Center(
-                                      child: Text(
-                                        'ENTER GRID',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          letterSpacing: 2,
+                                      child: Center(
+                                        child: Text(
+                                          _isLogin ? 'ENTER GRID' : 'INITIALIZE ID',
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            letterSpacing: 2,
+                                          ),
                                         ),
                                       ),
                                     ),
+                                  ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.5),
+                                  
+                                  const SizedBox(height: 24),
+                                  
+                                  const Row(
+                                    children: [
+                                      Expanded(child: Divider(color: Colors.white10)),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 16),
+                                        child: Text('OR', style: TextStyle(color: Colors.white24, fontSize: 12)),
+                                      ),
+                                      Expanded(child: Divider(color: Colors.white10)),
+                                    ],
                                   ),
-                                ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.5),
+                                  
+                                  const SizedBox(height: 24),
+                                  
+                                  _AnimatedButton(
+                                    onTap: _handleGoogleSignIn,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Image.network(
+                                            'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                                            height: 24,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Text(
+                                            'GOOGLE ACCESS',
+                                            style: TextStyle(
+                                              color: Colors.black87,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              letterSpacing: 1,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.5),
+                                  
+                                  const SizedBox(height: 24),
+                                  
+                                  TextButton(
+                                    onPressed: () => setState(() => _isLogin = !_isLogin),
+                                    child: Text(
+                                      _isLogin ? 'REQUEST NEW ID' : 'ALREADY HAVE ACCESS ID',
+                                      style: const TextStyle(color: NeonColors.primary, letterSpacing: 1, fontSize: 12),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ).animate().fadeIn(delay: 300.ms).scale(),

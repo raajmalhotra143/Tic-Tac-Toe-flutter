@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/neon_theme.dart';
+import '../../auth/services/auth_service.dart';
 
-class ModeSelectionScreen extends StatelessWidget {
+class ModeSelectionScreen extends ConsumerWidget {
   const ModeSelectionScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -51,7 +55,10 @@ class ModeSelectionScreen extends StatelessWidget {
                           ),
                         ),
                       ).animate().fadeIn().scale(),
-                      const SizedBox(width: 48), // Spacer for centering
+                      _AnimatedIconButton(
+                        icon: Icons.logout,
+                        onTap: () => ref.read(authServiceProvider).signOut(),
+                      ).animate().fadeIn().slideX(begin: 0.5),
                     ],
                   ),
                 ),
@@ -105,7 +112,11 @@ class ModeSelectionScreen extends StatelessWidget {
                         const SizedBox(height: 32),
 
                         // Online Mode Card
-                        _buildOnlineCard(context).animate().fadeIn(delay: 600.ms).slideX(begin: 0.2),
+                        authState.when(
+                          data: (user) => _buildOnlineCard(context, user != null),
+                          loading: () => const CircularProgressIndicator(),
+                          error: (_, __) => _buildOnlineCard(context, false),
+                        ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.2),
 
                         const SizedBox(height: 40),
                       ],
@@ -248,7 +259,7 @@ class ModeSelectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOnlineCard(BuildContext context) {
+  Widget _buildOnlineCard(BuildContext context, bool isAuthenticated) {
     return Container(
       decoration: NeonEffects.glassPanel(borderRadius: 24).copyWith(
         border: Border.all(color: Colors.white10),
@@ -334,53 +345,87 @@ class ModeSelectionScreen extends StatelessWidget {
                   style: TextStyle(color: Colors.white54, fontSize: 14, height: 1.5),
                 ),
                 const SizedBox(height: 32),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _AnimatedButton(
-                        onTap: () => context.push('/auth'),
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: NeonColors.primary),
-                            borderRadius: BorderRadius.circular(16),
-                            color: NeonColors.primary.withValues(alpha: 0.1),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.login, color: NeonColors.primary, size: 20),
-                              SizedBox(width: 8),
-                              Text('LOGIN', style: TextStyle(color: NeonColors.primary, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _AnimatedButton(
-                        onTap: () => context.push('/auth'),
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.white24),
-                            borderRadius: BorderRadius.circular(16),
-                            color: Colors.white.withValues(alpha: 0.05),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.person_add, color: Colors.white, size: 20),
-                              SizedBox(width: 8),
-                              Text('REGISTER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            ],
+                if (!isAuthenticated)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _AnimatedButton(
+                          onTap: () => context.push('/auth'),
+                          child: Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: NeonColors.primary),
+                              borderRadius: BorderRadius.circular(16),
+                              color: NeonColors.primary.withValues(alpha: 0.1),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.login, color: NeonColors.primary, size: 20),
+                                SizedBox(width: 8),
+                                Text('LOGIN', style: TextStyle(color: NeonColors.primary, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
                           ),
                         ),
                       ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _AnimatedButton(
+                          onTap: () => context.push('/auth'),
+                          child: Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.white24),
+                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.white.withValues(alpha: 0.05),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.person_add, color: Colors.white, size: 20),
+                                SizedBox(width: 8),
+                                Text('REGISTER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  _AnimatedButton(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Entering Global Arena... (Connecting to matchmaking)'),
+                          backgroundColor: NeonColors.primary,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: NeonColors.primary,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(color: NeonColors.primary.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 5))
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.public, color: Colors.black, size: 24),
+                          SizedBox(width: 12),
+                          Text(
+                            'ENTER ARENA',
+                            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
               ],
             ),
           ),
