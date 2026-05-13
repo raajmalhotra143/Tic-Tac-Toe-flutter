@@ -19,7 +19,7 @@ void main() async {
     debugPrint('Firebase already initialized or failed: $e');
   }
 
-  // Initialize Google Sign In
+  // Initialize Google Sign In (Required in 7.x)
   await GoogleSignIn.instance.initialize();
 
   runApp(
