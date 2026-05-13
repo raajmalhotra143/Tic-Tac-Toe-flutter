@@ -6,7 +6,7 @@ part of 'game_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$gameControllerHash() => r'de6f26c84bb358cfd484fb98f515f32867300fb0';
+String _$gameControllerHash() => r'628e0e9da8c138d7dd681433177306cc2a529599';
 
 /// See also [GameController].
 @ProviderFor(GameController)

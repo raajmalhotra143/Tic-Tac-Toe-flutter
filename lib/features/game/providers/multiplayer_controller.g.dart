@@ -7,7 +7,7 @@ part of 'multiplayer_controller.dart';
 // **************************************************************************
 
 String _$multiplayerControllerHash() =>
-    r'0c031ed5b6dc8890fe0ed5b901fa5a8c54bd9892';
+    r'a92792c0b27587857695c4f526d8a924b3125dca';
 
 /// See also [MultiplayerController].
 @ProviderFor(MultiplayerController)

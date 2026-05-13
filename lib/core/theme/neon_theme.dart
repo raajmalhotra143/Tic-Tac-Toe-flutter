@@ -2,70 +2,75 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NeonColors {
-  static const Color deepCharcoal = Color(0xFF0A0A0A);
-  static const Color neonCyan = Color(0xFF00FFFF);
-  static const Color neonMagenta = Color(0xFFFF00FF);
-  static const Color neonLime = Color(0xFF39FF14);
-  static const Color bgMid = Color(0xFF121212);
-  static const Color bgCard = Color(0xFF1E1E1E);
+  static const Color primary = Color(0xFF00E5FF);
+  static const Color backgroundDark = Color(0xFF0A161E);
+  static const Color backgroundLight = Color(0xFFF5F8F8);
+  static const Color cardDark = Color(0x1A00E5FF); // primary/10
+  static const Color borderDark = Color(0x3300E5FF); // primary/20
+  static const Color surfaceDark = Color(0xFF0C2227);
 }
 
 extension NeonEffects on BoxDecoration {
   static BoxDecoration neonBox({
-    required Color color,
+    Color color = NeonColors.primary,
     double blurRadius = 15.0,
     double spreadRadius = 1.0,
     double borderRadius = 12.0,
+    bool filled = false,
   }) {
     return BoxDecoration(
-      color: Colors.transparent,
+      color: filled ? color.withValues(alpha: 0.1) : Colors.transparent,
       borderRadius: BorderRadius.circular(borderRadius),
-      border: Border.all(color: color, width: 2),
+      border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       boxShadow: [
         BoxShadow(
-          color: color.withValues(alpha: 0.5),
+          color: color.withValues(alpha: 0.2),
           blurRadius: blurRadius,
           spreadRadius: spreadRadius,
         ),
-        BoxShadow(
-          color: color.withValues(alpha: 0.2),
-          blurRadius: blurRadius * 2,
-          spreadRadius: spreadRadius * 0.5,
-        ),
       ],
+    );
+  }
+
+  static BoxDecoration glassPanel({
+    double borderRadius = 12.0,
+  }) {
+    return BoxDecoration(
+      color: const Color(0x990A161E), // rgba(10, 22, 30, 0.6)
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: NeonColors.primary.withValues(alpha: 0.2), width: 1),
     );
   }
 }
 
 class NeonTheme {
   static final TextTheme _textTheme = TextTheme(
-    displayLarge: GoogleFonts.orbitron(
+    displayLarge: GoogleFonts.spaceGrotesk(
       fontSize: 48,
-      fontWeight: FontWeight.w900,
-      color: NeonColors.neonCyan,
-      letterSpacing: 2,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      letterSpacing: -1.5,
     ),
-    displayMedium: GoogleFonts.orbitron(
+    displayMedium: GoogleFonts.spaceGrotesk(
       fontSize: 32,
-      fontWeight: FontWeight.w800,
-      color: NeonColors.neonMagenta,
-    ),
-    headlineLarge: GoogleFonts.rajdhani(
-      fontSize: 28,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.bold,
       color: Colors.white,
     ),
-    titleLarge: GoogleFonts.rajdhani(
-      fontSize: 20,
+    headlineLarge: GoogleFonts.spaceGrotesk(
+      fontSize: 28,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+    titleLarge: GoogleFonts.spaceGrotesk(
+      fontSize: 22,
       fontWeight: FontWeight.w600,
       color: Colors.white,
-      letterSpacing: 1.2,
     ),
-    bodyLarge: GoogleFonts.rajdhani(
+    bodyLarge: GoogleFonts.spaceGrotesk(
       fontSize: 16,
       color: Colors.white.withValues(alpha: 0.9),
     ),
-    bodyMedium: GoogleFonts.rajdhani(
+    bodyMedium: GoogleFonts.spaceGrotesk(
       fontSize: 14,
       color: Colors.white.withValues(alpha: 0.7),
     ),
@@ -74,12 +79,11 @@ class NeonTheme {
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: NeonColors.deepCharcoal,
+    scaffoldBackgroundColor: NeonColors.backgroundDark,
     colorScheme: const ColorScheme.dark(
-      primary: NeonColors.neonCyan,
-      secondary: NeonColors.neonMagenta,
-      surface: NeonColors.bgMid,
-      error: Colors.redAccent,
+      primary: NeonColors.primary,
+      surface: NeonColors.backgroundDark,
+      onSurface: Colors.white,
     ),
     textTheme: _textTheme,
     appBarTheme: AppBarTheme(
@@ -87,21 +91,19 @@ class NeonTheme {
       elevation: 0,
       centerTitle: true,
       titleTextStyle: _textTheme.titleLarge?.copyWith(
-        color: NeonColors.neonCyan,
         fontWeight: FontWeight.bold,
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.black,
-        backgroundColor: NeonColors.neonCyan,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        textStyle: GoogleFonts.orbitron(
+        foregroundColor: NeonColors.backgroundDark,
+        backgroundColor: NeonColors.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: GoogleFonts.spaceGrotesk(
           fontWeight: FontWeight.bold,
-          letterSpacing: 1,
+          fontSize: 18,
         ),
-        elevation: 10,
-        shadowColor: NeonColors.neonCyan.withValues(alpha: 0.6),
+        elevation: 0,
       ),
     ),
   );

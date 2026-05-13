@@ -4,19 +4,23 @@ class TicTacToeLogic {
   static const int boardSize = 3;
 
   static bool checkWin(List<Player> board, Player player) {
+    return getWinningLine(board, player) != null;
+  }
+
+  static List<int>? getWinningLine(List<Player> board, Player player) {
     // Rows
     for (int i = 0; i < 9; i += 3) {
-      if (board[i] == player && board[i + 1] == player && board[i + 2] == player) return true;
+      if (board[i] == player && board[i + 1] == player && board[i + 2] == player) return [i, i + 1, i + 2];
     }
     // Columns
     for (int i = 0; i < 3; i++) {
-      if (board[i] == player && board[i + 3] == player && board[i + 6] == player) return true;
+      if (board[i] == player && board[i + 3] == player && board[i + 6] == player) return [i, i + 3, i + 6];
     }
     // Diagonals
-    if (board[0] == player && board[4] == player && board[8] == player) return true;
-    if (board[2] == player && board[4] == player && board[6] == player) return true;
+    if (board[0] == player && board[4] == player && board[8] == player) return [0, 4, 8];
+    if (board[2] == player && board[4] == player && board[6] == player) return [2, 4, 6];
 
-    return false;
+    return null;
   }
 
   static bool isDraw(List<Player> board) {
@@ -24,11 +28,6 @@ class TicTacToeLogic {
   }
 
   static int calculateStars(int moves) {
-    // Stars(m) = max(0, 3 - floor((m-3)/1))
-    // But Tic-Tac-Toe moves for a single player are different.
-    // Let's assume 'm' is total moves in the game.
-    // For X to win in 3 moves (its own), total moves = 5 (X O X O X)
-    // Wait, the formula says m is total moves.
     final stars = 3 - (moves - 3);
     if (stars < 0) return 0;
     if (stars > 3) return 3;

@@ -9,34 +9,46 @@ class GameState {
   final List<Player> board;
   final Player currentPlayer;
   final Player? winner;
+  final List<int>? winningLine;
   final bool isDraw;
   final int moves;
   final String aiDifficulty;
+  final String playerXEmoji;
+  final String playerOEmoji;
 
   GameState({
     required this.board,
     this.currentPlayer = Player.x,
     this.winner,
+    this.winningLine,
     this.isDraw = false,
     this.moves = 0,
     this.aiDifficulty = 'normal',
+    this.playerXEmoji = '😀',
+    this.playerOEmoji = '🤖',
   });
 
   GameState copyWith({
     List<Player>? board,
     Player? currentPlayer,
     Player? winner,
+    List<int>? winningLine,
     bool? isDraw,
     int? moves,
     String? aiDifficulty,
+    String? playerXEmoji,
+    String? playerOEmoji,
   }) {
     return GameState(
       board: board ?? this.board,
       currentPlayer: currentPlayer ?? this.currentPlayer,
       winner: winner ?? this.winner,
+      winningLine: winningLine ?? this.winningLine,
       isDraw: isDraw ?? this.isDraw,
       moves: moves ?? this.moves,
       aiDifficulty: aiDifficulty ?? this.aiDifficulty,
+      playerXEmoji: playerXEmoji ?? this.playerXEmoji,
+      playerOEmoji: playerOEmoji ?? this.playerOEmoji,
     );
   }
 }
@@ -50,6 +62,10 @@ class GameController extends _$GameController {
 
   void setDifficulty(String difficulty) {
     state = state.copyWith(aiDifficulty: difficulty);
+  }
+
+  void setPlayerEmoji(String emoji) {
+    state = state.copyWith(playerXEmoji: emoji);
   }
 
   Future<void> makeMove(int index) async {
@@ -74,10 +90,13 @@ class GameController extends _$GameController {
     newBoard[index] = state.currentPlayer;
     final newMoves = state.moves + 1;
 
-    if (TicTacToeLogic.checkWin(newBoard, state.currentPlayer)) {
+    final winLine = TicTacToeLogic.getWinningLine(newBoard, state.currentPlayer);
+
+    if (winLine != null) {
       state = state.copyWith(
         board: newBoard,
         winner: state.currentPlayer,
+        winningLine: winLine,
         moves: newMoves,
       );
     } else if (TicTacToeLogic.isDraw(newBoard)) {
@@ -99,6 +118,8 @@ class GameController extends _$GameController {
     state = GameState(
       board: List.filled(9, Player.none),
       aiDifficulty: state.aiDifficulty,
+      playerXEmoji: state.playerXEmoji,
+      playerOEmoji: state.playerOEmoji,
     );
   }
 }
